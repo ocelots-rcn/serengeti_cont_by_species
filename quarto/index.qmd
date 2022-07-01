@@ -1,0 +1,106 @@
+---
+format: 
+  html:
+    page-layout: custom
+---
+
+<style>
+body {
+  margin: 10px;
+}
+</style>
+
+```{r, echo=FALSE, message=FALSE}
+library(dplyr)
+
+# Read in data 
+Serengeti <- read.csv("https://github.com/ocelots-rcn/quarto-serengeti/raw/4b0d01466d8361cdf70d9390c03d04754ca09a07/S1-11_filtered.csv")
+
+grazerList <- c("buffalo","bushbuck","dikDik","eland","elephant","gazelleGrants", "gazelleThomsons","giraffe","hartebeest","hippopotamus","impala", "reedbuck", "rhinoceros", "topi", "warthog", "wildebeest","zebra")
+predList <- c("aardwolf","batEaredFox","caracal","civet","genet","jackal","hyenaSpotted","hyenaStriped","wildcat","serval","cheetah","leopard","lionMale","lionFemale")
+otherList <-c("aardvark","baboon","guineaFowl","hare","honeyBadger","human","koriBustard","mongoose","ostrich","otherBird","porcupine","reptiles","rodents","secretaryBird")
+
+# Generate lists of categories
+
+categoryNames <- c("Grazers","Predators","Other")
+categoryList <- list(grazerList, predList, otherList)
+
+# Generate lists for continuous variables
+contVarList = c("Amount.of.Shade", "Distance.to.River..m.",
+                "Distance.to.Confluence..m.","Distance.to.Kopje..m.",
+                "Tree.Density.Measure", "Lion.Risk..Wet.",
+                "Lion.Risk..Dry.","Greeness..Wet.",
+                "Greeness..Dry." )
+contVarNames = c("Shade (0-4 scale)","Distance to river (m)",
+                 "Distance to confluence (m)", "Distance to kopje (m)",
+                 "Ave. distance to trees (m)", "Lion encounter rate (wet)",
+                 "Lion encounter rate (dry)", "Greenness, (wet)",
+                 "Greenness, (dry)"
+)
+
+# Create maps
+speciesCats = mapply(function (x, y) list(name = x, category = y), categoryNames, categoryList, SIMPLIFY = F)
+
+contVars = mapply(function (x, y) list(name = x, variable = y), contVarNames, contVarList, SIMPLIFY = F)
+
+ojs_define(serengeti = Serengeti, contVars, speciesCats)
+```
+
+```{ojs}
+//| echo: false
+import { aq, op } from '@uwdata/arquero'
+species_filt = aq.table(serengeti)
+  .filter(aq.escape(r => op.includes(species.category, r.Species)))
+```
+
+```{ojs}
+//| echo: false
+Plotly = require("https://cdn.plot.ly/plotly-latest.min.js")
+```
+
+```{ojs}
+//| echo: false
+//| panel: sidebar
+
+categories = Object.values(speciesCats)
+viewof species = Inputs.radio(
+  categories,
+  {
+    value: categories[0],
+    label: "Select species:",
+    format: x => x.name
+  }
+)
+
+variables = Object.values(contVars)
+viewof contVar = Inputs.radio(
+  variables,
+  {
+    value: variables[0], 
+    label: "Select a Continuous Variable:",
+    format: x => x.name
+  }
+)
+```
+
+```{ojs}
+//| echo: false
+//| panel: fill
+{
+  let data = [];
+  for (var i = 0; i < species.category.length; i++) {
+    data.push({
+      y: species_filt.filter(aq.escape(r => r.Species === species.category[i])).reify().data()[contVar.variable].data,
+      type: "box",
+      name: species.category[i]
+    })
+  }
+  const div = DOM.element('div');
+  let layout = {
+    title: "Species differences in Continuous Variables",
+    yaxis: { title: contVar.name }
+  };
+  Plotly.newPlot(div, data, layout);
+  return div;
+}
+```
