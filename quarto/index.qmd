@@ -60,6 +60,27 @@ Plotly = require("https://cdn.plot.ly/plotly-latest.min.js")
 
 ```{ojs}
 //| echo: false
+plotData = {
+    let data = [];
+    const div = DOM.element('div');
+    let layout = {
+      title: "Species differences in Continuous Variables",
+      yaxis: { title: contVar.name }
+    };
+    for (var i = 0; i < species.category.length; i++) {
+      data.push({
+        y: species_filt.filter(aq.escape(r => r.Species === species.category[i])).reify().data()[contVar.variable].data,
+        type: "box",
+        name: species.category[i]
+      })
+      yield {html: html`<progress max="${species.category.length}" value="${i}"></progress>`}
+    }
+    yield {div: div, data: data, layout: layout};
+}
+```
+
+```{ojs}
+//| echo: false
 //| panel: sidebar
 
 categories = Object.values(speciesCats)
@@ -87,20 +108,11 @@ viewof contVar = Inputs.radio(
 //| echo: false
 //| panel: fill
 {
-  let data = [];
-  for (var i = 0; i < species.category.length; i++) {
-    data.push({
-      y: species_filt.filter(aq.escape(r => r.Species === species.category[i])).reify().data()[contVar.variable].data,
-      type: "box",
-      name: species.category[i]
-    })
+  if ('html' in plotData) {
+    plotData.div = plotData.html;
+  } else {
+    Plotly.newPlot(plotData.div, plotData.data, plotData.layout);
   }
-  const div = DOM.element('div');
-  let layout = {
-    title: "Species differences in Continuous Variables",
-    yaxis: { title: contVar.name }
-  };
-  Plotly.newPlot(div, data, layout);
-  return div;
+  return(plotData.div);
 }
 ```
