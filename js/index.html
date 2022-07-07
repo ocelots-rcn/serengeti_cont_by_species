@@ -53,7 +53,7 @@
       
     }
 
-    const clear = () => {
+    const clearList = () => {
       speciesList.set([]);
     }
 
@@ -171,6 +171,8 @@
           <span style="font-weight: bold">Quick Load</span><br />
           <input value="Predators" type="button" onClick="loadPredators()" /> <input value="Grazers" type="button" onClick="loadGrazers()" /> <input value="Others" type="button" onClick="loadOthers()" />
         </div>
+        <hr>
+        <input value="Clear Species List" type="button" onClick="clearList()" />
       </div>
       <div id="Plot" style="flex: 1;min-height: 500px"></div>
     </div>
