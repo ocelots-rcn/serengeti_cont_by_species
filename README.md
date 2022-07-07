@@ -3,3 +3,5 @@
 ## Quarto Version
 https://ocelots-rcn.github.io/serengeti_cont_by_species/quarto/
 
+## Pure JavaScript Version
+https://ocelots-rcn.github.io/serengeti_cont_by_species/js/
