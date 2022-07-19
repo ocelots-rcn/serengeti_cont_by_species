@@ -6,73 +6,22 @@
   <link href="./includes/slimselect.min.css" rel="stylesheet">
 
   <script>
-    let data = {};
-    let speciesList = null;
-
-    axios.get('../data/cont_var.json').then((response) => {
-      data = response.data;
-
-      // Populate selection list
-      let species = document.getElementById('Species');
-      Object.keys(data.species).sort().forEach( (val) => {
-        let newOption = new Option(val, val);
-        species.add(newOption,undefined);
-      });
-
-      speciesList = new SlimSelect({
-        select: '#Species'
-      });
-
-    });
-
-    // Update graph when selections changes
-    const rePlot = () => {
-      let variable = document.querySelector('input[name=variable]:checked').value;
-      let format = document.querySelector('input[name=format]:checked').value;
-      let pdata = [];
-      let selected = speciesList.selected();
-
-      if(selected.length > 0) {
-        selected.forEach( (species) => {
-          let plotd = {
-            y: data.species[species][variable],
-            name: species,
-            type: format
-          };
-          pdata.push(plotd);
-        });
-      }
-      if(format === 'box') {
-        Plotly.newPlot('Plot', pdata, {yaxis: {title: variable}, xaxis: {title: 'Species'}});
-      }
-      else {
-        Plotly.newPlot('Plot', pdata, {yaxis: {title: variable}, xaxis: {title: 'Frequency'}});
-      }
-
-    }
-
-    const clearList = () => {
-      speciesList.set([]);
-    }
-
-    // Quick load helper
-    const quickLoad = (key) => {
-      speciesList.set(data.groups[key]);
-    }
-
     const switchTab = (el) => {
-      if(el.id === 'OverviewTab') {
-        document.getElementById('OverviewTab').style['background-color'] = '#EEE';
-        document.getElementById('FiltersTab').style['background-color'] = '#FFF';
-        document.getElementById('Overview').style.display = 'block';
-        document.getElementById('Filters').style.display = 'none';
-      }
-      else {
-        document.getElementById('OverviewTab').style['background-color'] = '#FFF';
-        document.getElementById('FiltersTab').style['background-color'] = '#EEE';
-        document.getElementById('Overview').style.display = 'none';
-        document.getElementById('Filters').style.display = 'block';
-      }
+      let tabParent = el.parentElement;
+      let tabName = el.getAttribute("name");
+
+      // Cycle through tabs to change look
+      for (let child of tabParent.children) {
+        el == child ? child.style['background-color'] = '#EEE' : child.style['background-color'] = '#FFF';
+      };
+
+      // Cycle through content divs
+      for (let child of tabParent.parentElement.children) {
+        if(child.getAttribute("name") !== 'tabs') {
+          let divName = child.getAttribute("name");
+          tabName == divName ? child.style.display = 'block' : child.style.display = 'none';
+        }
+      };
     }
   </script>
 </head>
@@ -80,44 +29,45 @@
 <body >
   <div style="display: flex;flex-direction: row;">
     <div style="width: 250px;padding: 5px">
-      <div style="display: flex;flex-direction: row;margin-bottom: 5px">
-        <div id="OverviewTab" style="flex: 1;padding: 10px;border: 1px solid #CCC;cursor: pointer;background-color: #EEE" onclick="switchTab(this)">Overview</div>
-        <div id="FiltersTab" style="flex: 1;padding: 10px;border: 1px solid #CCC;cursor: pointer" onclick="switchTab(this)">Filters</div>
+      <div name="tabs" style="display: flex;flex-direction: row;margin-bottom: 5px">
+        <div name="overview" style="flex: 1;padding: 10px;border: 1px solid #CCC;cursor: pointer;background-color: #EEE" onclick="switchTab(this)">Overview</div>
+        <div name="filters" style="flex: 1;padding: 10px;border: 1px solid #CCC;cursor: pointer" onclick="switchTab(this)">Filters</div>
       </div>
-      <div id="Overview">
+      <div name="overview">
         <p style="font-size: 1.2em">Boxplots - comparing categorical and continuous variables</p>
         <p>Boxplots are useful graphs for exploring the relationship between a categorical variable and a continuous variable.</p>
         <p>In this boxplot, the categorical variable is presented on the X-axis, and the continuous variable on the Y-axis. The top and bottom of the box correspond to the 25% and 75% percentiles of the data. The whiskers indicate the ~95% percentiles of the data. Data beyond the end of the whiskers are called "outlying" points and are plotted individually. The line in the center of the box represents the median.</p>
         <p>You can use the filters to narrow down what photos you are interested in. You can also select multiple species to compare. The data for each species will be represented by a different color.</p>
       </div>
-      <div id="Filters" style="display: none">
+      <div name="filters" style="display: none">
         <span style="font-weight: bold">Species</span><br />
-        <select id="Species" multiple onChange="rePlot()"></select><br />
+        <select id="ContVarSpecies" multiple onChange="contVarPlot()"></select><br />
         <hr>
         <span style="font-weight: bold">Quick Load</span><br />
-        <input value="Predators" type="button" onClick="quickLoad('predator')" /> <input value="Prey" type="button" onClick="quickLoad('prey')" /> <input value="Other" type="button" onClick="quickLoad('other')" />
+        <input value="Predators" type="button" onClick="contVarQuickLoad('predator')" /> <input value="Prey" type="button" onClick="contVarQuickLoad('prey')" /> <input value="Other" type="button" onClick="contVarQuickLoad('other')" />
         <hr>
         <span style="font-weight: bold">Variable</span><br />
-        <input name="variable" type="radio" value="Amount of Shade" onClick="rePlot()" checked /><span>Amount of Shade</span><br />
-        <input name="variable" type="radio" value="Distance to Confluence  m " onClick="rePlot()" /><span>Distance to Confluence (m)</span><br />
-        <input name="variable" type="radio" value="Distance to Kopje  m " onClick="rePlot()" /><span>Distance to Kopje (m)</span><br />
-        <input name="variable" type="radio" value="Distance to River  m " onClick="rePlot()" /><span>Distance to River (m)</span><br />
-        <input name="variable" type="radio" value="Lion Risk  Dry " onClick="rePlot()" /><span>Lion Risk (Dry)</span><br />
-        <input name="variable" type="radio" value="Lion Risk  Wet " onClick="rePlot()" /><span>Lion Risk (Wet)</span><br />
-        <input name="variable" type="radio" value="SeasonalGreenness" onClick="rePlot()" /><span>Seasonal Greenness</span><br />
-        <input name="variable" type="radio" value="Tree Density Measure" onClick="rePlot()" /><span>Tree Density Measure</span><br />
-        <input name="variable" type="radio" value="Longitude  m " onClick="rePlot()" /><span>Longitude (m)</span><br />
-        <input name="variable" type="radio" value="Latitude  m " onClick="rePlot()" /><span>Latitude (m)</span><br />
+        <input name="contVarVariable" type="radio" value="Amount of Shade" onClick="contVarPlot()" checked /><span>Amount of Shade</span><br />
+        <input name="contVarVariable" type="radio" value="Distance to Confluence  m " onClick="contVarPlot()" /><span>Distance to Confluence (m)</span><br />
+        <input name="contVarVariable" type="radio" value="Distance to Kopje  m " onClick="contVarPlot()" /><span>Distance to Kopje (m)</span><br />
+        <input name="contVarVariable" type="radio" value="Distance to River  m " onClick="contVarPlot()" /><span>Distance to River (m)</span><br />
+        <input name="contVarVariable" type="radio" value="Lion Risk  Dry " onClick="contVarPlot()" /><span>Lion Risk (Dry)</span><br />
+        <input name="contVarVariable" type="radio" value="Lion Risk  Wet " onClick="contVarPlot()" /><span>Lion Risk (Wet)</span><br />
+        <input name="contVarVariable" type="radio" value="SeasonalGreenness" onClick="contVarPlot()" /><span>Seasonal Greenness</span><br />
+        <input name="contVarVariable" type="radio" value="Tree Density Measure" onClick="contVarPlot()" /><span>Tree Density Measure</span><br />
+        <input name="contVarVariable" type="radio" value="Longitude  m " onClick="contVarPlot()" /><span>Longitude (m)</span><br />
+        <input name="contVarVariable" type="radio" value="Latitude  m " onClick="contVarPlot()" /><span>Latitude (m)</span><br />
         <hr>
         <span style="font-weight: bold">Plot Format</span><br />
-        <input name="format" type="radio" value="box" onClick="rePlot()" checked /><span>Box</span>
-        <input name="format" type="radio" value="histogram" onClick="rePlot()" /><span>Histogram</span><br />
+        <input name="contVarFormat" type="radio" value="box" onClick="contVarPlot()" checked /><span>Box</span>
+        <input name="contVarFormat" type="radio" value="histogram" onClick="contVarPlot()" /><span>Histogram</span><br />
         <hr>
-        <input value="Clear Species List" type="button" onClick="clearList()" />
+        <input value="Clear Species List" type="button" onClick="contVarClearList()" />
       </div>
     </div>
-    <div id="Plot" style="flex: 1;min-height: 500px"></div>
+    <div id="ContVarPlot" style="flex: 1;min-height: 500px"></div>
   </div>
 
 </body>
+<script src="./cont_var.js"></script>
 </html>
