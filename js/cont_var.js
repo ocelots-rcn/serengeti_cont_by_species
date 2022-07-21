@@ -38,14 +38,14 @@ const contVarPlot = () => {
     }
     if(format === 'box') {
         if(variable.includes('Distance')){ 
-            Plotly.newPlot('ContVarPlot', pdata, {yaxis: {title: variable, range: [0, 11000]}, xaxis: {title: 'Species'}});
+            Plotly.newPlot('ContVarPlot', pdata, {yaxis: {title: variable, range: [0, 11000]}, xaxis: {title: 'Species'}}, {responsive: true});
         }
         else {
-         Plotly.newPlot('ContVarPlot', pdata, {yaxis: {title: variable}, xaxis: {title: 'Species'}});
+         Plotly.newPlot('ContVarPlot', pdata, {yaxis: {title: variable}, xaxis: {title: 'Species'}}, {responsive: true});
         }
     }
     else {
-        Plotly.newPlot('ContVarPlot', pdata, {yaxis: {title: variable}, xaxis: {title: 'Frequency'}});
+        Plotly.newPlot('ContVarPlot', pdata, {yaxis: {title: variable}, xaxis: {title: 'Frequency'}}, {responsive: true});
     }
 }
 
