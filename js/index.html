@@ -33,18 +33,20 @@
         <div name="overview" style="flex: 1;padding: 10px;border: 1px solid #CCC;cursor: pointer;background-color: #EEE" onclick="switchTab(this)">Overview</div>
         <div name="filters" style="flex: 1;padding: 10px;border: 1px solid #CCC;cursor: pointer" onclick="switchTab(this)">Filters</div>
       </div>
-      <div name="overview">
+      <div name="overview" style="max-height: 450px;overflow-y: scroll">
         <p style="font-size: 1.2em">Boxplots - comparing categorical and continuous variables</p>
         <p>Boxplots are useful graphs for exploring the relationship between a categorical variable and a continuous variable.</p>
         <p>In this boxplot, the categorical variable is presented on the X-axis, and the continuous variable on the Y-axis. The top and bottom of the box correspond to the 25% and 75% percentiles of the data. The whiskers indicate the ~95% percentiles of the data. Data beyond the end of the whiskers are called "outlying" points and are plotted individually. The line in the center of the box represents the median.</p>
         <p>You can use the filters to narrow down what photos you are interested in. You can also select multiple species to compare. The data for each species will be represented by a different color.</p>
       </div>
-      <div name="filters" style="display: none">
+      <div name="filters" style="max-height: 450px;overflow-y: scroll;display: none">
         <span style="font-weight: bold">Species</span><br />
         <select id="ContVarSpecies" multiple onChange="contVarPlot()"></select><br />
         <hr>
         <span style="font-weight: bold">Quick Load</span><br />
-        <input value="Predators" type="button" onClick="contVarQuickLoad('predator')" /> <input value="Prey" type="button" onClick="contVarQuickLoad('prey')" /> <input value="Other" type="button" onClick="contVarQuickLoad('other')" />
+        <input value="Predators" type="button" onClick="contVarQuickLoad('predator')" /> 
+        <input value="Prey" type="button" onClick="contVarQuickLoad('prey')" /> 
+        <input value="Other" type="button" onClick="contVarQuickLoad('other')" />
         <hr>
         <span style="font-weight: bold">Variable</span><br />
         <input name="contVarVariable" type="radio" value="Amount of Shade" onClick="contVarPlot()" checked /><span>Amount of Shade</span><br />
